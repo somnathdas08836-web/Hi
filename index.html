@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TikBangla - Scrollable Gifts</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-red: #ff0050;
+      --primary-cyan: #00f2ea;
+      --gold: #ffd700;
+      --rose-red: #ff0000;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: #000; color: #fff; height: 100vh; overflow: hidden; }
+
+    /* --- ভিডিও ফিড --- */
+    .feed-container { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
+    .feed-container::-webkit-scrollbar { display: none; }
+    .video-section { height: 100vh; scroll-snap-align: start; position: relative; background: #000; }
+    video { width: 100%; height: 100%; object-fit: cover; }
+
+    /* --- টপ বার (প্লাস বাটন) --- */
+    .top-bar { position: fixed; top: 25px; width: 100%; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 50; }
+    .top-logo { font-size: 22px; font-weight: 800; }
+    .top-logo span:nth-child(2) { color: var(--primary-cyan); }
+    .top-logo span:nth-child(3) { color: var(--primary-red); }
+    .small-plus-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; }
+
+    /* --- ডাবল ট্যাপ লাইক --- */
+    .like-heart { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); color: var(--primary-red); font-size: 90px; z-index: 100; pointer-events: none; opacity: 0; }
+    .like-heart.animate { animation: heartPop 0.8s ease-out; }
+    @keyframes heartPop {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+      30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+    }
+
+    /* --- ভিডিও তথ্য --- */
+    .video-info { position: absolute; left: 15px; bottom: 115px; z-index: 10; text-shadow: 0 1px 4px #000; }
+    .username { font-weight: 700; font-size: 17px; margin-bottom: 5px; }
+    .caption { font-size: 13px; color: #ddd; }
+
+    /* --- সাইড স্ক্রল গিফট বার (নতুন) --- */
+    .bottom-gift-container {
+      position: fixed; bottom: 0; width: 100%; height: 95px;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
+      z-index: 60; border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center;
+    }
+    .gift-scroll-wrapper {
+      display: flex; overflow-x: auto; scrollbar-width: none;
+      padding: 0 15px; gap: 25px; align-items: center; width: 100%;
+    }
+    .gift-scroll-wrapper::-webkit-scrollbar { display: none; }
+
+    .gift-item {
+      display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; transition: 0.2s;
+    }
+    .gift-item:active { transform: scale(0.85); }
+    .gift-item i { font-size: 28px; margin-bottom: 5px; }
+    .gift-item .coin-text { font-size: 11px; font-weight: bold; color: var(--gold); }
+    .gift-item .gift-name { font-size: 10px; color: #aaa; margin-top: 2px; }
+
+    /* গিফট আইকন কালার */
+    .fa-seedling { color: var(--rose-red); } /* গোলাপের জন্য */
+    .fa-gem { color: #00d2ff; }
+    .fa-crown { color: var(--gold); }
+    .fa-rocket { color: #ff7675; }
+    .fa-pizza-slice { color: #ffaa00; }
+    .fa-car { color: #fff; }
+    .fa-earth-americas { color: #2ecc71; }
+
+    #toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--primary-cyan); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: bold; display: none; z-index: 1000; }
+  </style>
+</head>
+<body>
+
+<div id="toast">মেসেজ</div>
+
+<div class="top-bar">
+  <div class="top-logo"><span>Tik</span><span>Bang</span><span>la</span></div>
+  <div class="small-plus-btn" onclick="showToast('ভিডিও আপলোড করুন')"><i class="fas fa-plus"></i></div>
+</div>
+
+<div class="feed-container">
+  <div class="video-section" ondblclick="handleLike(this)">
+    <video loop playsinline autoplay muted src="https://assets.mixkit.co/videos/preview/mixkit-girl-dancing-in-a-studio-with-blue-neon-lights-34658-large.mp4"></video>
+    <i class="fas fa-heart like-heart"></i>
+    <div class="video-info">
+      <div class="username">@dance_queen</div>
+      <div class="caption">নিচে স্ক্রল করে নতুন গিফট দেখুন! ➡️🎁</div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-gift-container">
+  <div class="gift-scroll-wrapper">
+    <div class="gift-item" onclick="sendGift('Rose', 5)">
+        <i class="fas fa-seedling"></i>
+        <span class="coin-text">🪙 5</span>
+        <span class="gift-name">Rose</span>
+    </div>
+    <div class="gift-item" onclick="sendGift('Diamond', 50)">
+        <i class="fas fa-gem"></i>
+        <span class="coin-text">🪙 50</span>
+        <span class="gift-name">Diamond</span>
+    </div>
+    <div class="gift-item" onclick="sendGift('Crown', 500)">
+        <i class="fas fa-crown"></i>
+        <span class="coin-text">🪙 500</span>
+        <span class="gift-name">Crown</span>
+    </div>
+    <div class="gift-item" onclick="sendGift('Rocket', 1000)">
+        <i class="fas fa-rocket"></i>
+        <span class="coin-text">🪙 1k</span>
+        <span class="gift-name">Rocket</span>
+    </div>
+    <div class="gift-item" onclick="sendGift('Pizza', 20)">
+        <i class="fas fa-pizza-slice"></i>
+        <span class="coin-text">🪙 20</span>
+        <span class="gift-name">Pizza</span>
+    </div>
+    <div class="gift-item" onclick="sendGift('Car', 5000)">
+        <i class="fas fa-car"></i>
+        <span class="coin-text">🪙 5k</span>
+        <span class="gift-name">SuperCar</span>
+    </div>
+    <div class="gift-item" onclick="sendGift('Planet', 10000)">
+        <i class="fas fa-earth-americas"></i>
+        <span class="coin-text">🪙 10k</span>
+        <span class="gift-name">Planet</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function handleLike(element) {
+    const heart = element.querySelector('.like-heart');
+    heart.classList.add('animate');
+    setTimeout(() => heart.classList.remove('animate'), 800);
+  }
+
+  function sendGift(name, price) {
+    showToast(`আপনি ${price} কয়েন দিয়ে একটি ${name} পাঠিয়েছেন!`);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 2000);
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const video = entry.target.querySelector('video');
+      if (entry.isIntersecting) video.play().catch(()=>{});
+      else video.pause();
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.video-section').forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
